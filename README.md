@@ -40,20 +40,42 @@ their daily activities. In this way, the researcher takes a passive approach to
 discovering these vulnerabilities, rather than a more active approach (e.g.
 code audits.)
 
+## Installation
+
+### snap
+
+This project can be installed by using snap:
+
+`snap install owwatcher`
+
+### pip
+
+This project can be installed using pip:
+
+`pip install --user .`
+
+### virtualenv
+
+This project can be installed into a python virtual environment:
+
+```
+$> virtualenv venv
+$> source venv/bin/activate
+$> pip install .
+$> deactivate
+```
+
 ## Runing OWWatcher
 
-OWWatcher attempts to read options from a config file. By default, it looks for
-a config file at `/etc/owwatcher.conf` or, if installed as a snap,
-`/var/snap/owwatcher/current/owwatcher.conf`. Command line arguments can be used
-to override the settings in the config file or run OWWatcher without a config
-file present. See "Usage" or run `owwatcher --help` for a description of
+See "Usage" or run `owwatcher --help` for a description of
 available command line arguments.
 
 ### Usage
 
 ```
-usage: owwatcher [-h] [-c CONFIG_PATH] [-d DIRS] [-p SYSLOG_PORT]
-                 [-s SYSLOG_SERVER] [-t] [-l LOG_FILE] [--debug]
+usage: owwatcher [-h] [-c CONFIG_PATH] [-d DIRS] [-r] [-m PERMS_MASK]
+                 [-a ARCHIVE_PATH] [-p SYSLOG_PORT] [-s SYSLOG_SERVER] [-t]
+                 [--stdout] [-l LOG_FILE] [--debug]
 
 Watch a directory for newly created world writable files and directories. Log
 events to a syslog server.
@@ -64,14 +86,24 @@ optional arguments:
                         A config file to read settings from. Command line
                         arguments override values read from the config file.
                         If the config file does not exist, owwatcher will log
-                        a warning and ignore the specified config file
-                        (default: /etc/owwatcher.conf)
+                        a warning and ignore the specified config file. NOTE:
+                        If a config file is specified, all other command-line
+                        options will be ignored. (default: None)
   -d DIRS, --dirs DIRS  A comma-separated list of directories to watch for
                         world writable files/dirs (default: None)
+  -r, --recursive       Set up inotify watches recursively. This canidentify
+                        more potential vulnerabilities but willresults in a
+                        lot of false positives. (default: False)
   -m PERMS_MASK, --perms-mask PERMS_MASK
                         Instead of alerting only on world writable files, use
                         a mask (e.g. 077) to identify files with incorrect
                         permissions (default: None)
+  -a ARCHIVE_PATH, --archive-path ARCHIVE_PATH
+                        A directory where files identified by OWWatcher can be
+                        archived. If this option is set, OWWatcher will
+                        *attempt* to copy files that are world writable or
+                        match perms-mask so they can be inspected. (default:
+                        None)
   -p SYSLOG_PORT, --syslog-port SYSLOG_PORT
                         The port that the syslog server is listening on
                         (default: None)
@@ -80,16 +112,21 @@ optional arguments:
                         None)
   -t, --tcp             Use TCP instead of UDP to send syslog messages.
                         (default: False)
+  --stdout              Send output to stdout. This is the default behaviorif
+                        a log file is not specified. If a log file is
+                        specified, OWWatcher will not send output to
+                        stdoutunless this flag is set. (default: False)
   -l LOG_FILE, --log-file LOG_FILE
                         Path to log file (default: None)
   --debug               Enable debug logging (default: False)
+
 ```
 
 ### If installed as a snap
 
-If installed as a snap, OWWatcher will run in the background as a daemon. You
-can enable and disable the OWWatcher daemon by running `snap start
---enable owwatcher` and `snap stop --disable owwatcher` respectively.
+If installed as a snap, OWWatcher can run in the foreground or in the background
+as a daemon. You can enable and disable the OWWatcher daemon by running `snap
+start --enable owwatcher` and `snap stop --disable owwatcher` respectively.
 
 You can invoke `owwatcher` directly as long as `/snap/bin` is in your $PATH.
 
@@ -148,31 +185,6 @@ list as well.
 
     **Example**: `strace -e inject=mkdir,openat:delay_exit=100000 <COMMAND>`
 
-## Installation
-
-### snap
-
-This project can be installed by using snap:
-
-`snap install owwatcher`
-
-### pip
-
-This project can be installed using pip:
-
-`pip install --user .`
-
-### virtualenv
-
-This project can be installed into a python virtual environment:
-
-```
-$> virtualenv venv
-$> source venv/bin/activate
-$> pip install .
-$> deactivate
-```
-
 ## Development
 
 ### Test Suite
@@ -201,5 +213,5 @@ A test coverage report can be viewed by pointing your browser at
    were only sent once. I've yet to determine whether or not this is the fault
    of this tool, the python syslog handler, or rsyslog itself.
 
-1. It may be acceptable for some files to be world writable. a whitelist
+1. It may be acceptable for some files to be world writable. A whitelist
    capability to prevent unnecessary alerts would reduce false positives.
