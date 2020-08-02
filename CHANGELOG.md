@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+OWWatcher has been renamed "TmpWatcher". This repository has been deprecated.
+You can find TmpWatcher at [https://github.com/mssalvatore/tmpwatcher](https://github.com/mssalvatore/tmpwatcher)
+
 ## [2.2.0] - 2020-05-22
 ### Added
 - Continuous integration with Travis CI.
