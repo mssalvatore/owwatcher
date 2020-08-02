@@ -52,6 +52,11 @@ def main():
         # TODO: Attempt to log error with some kind of failsafe logger
 
     _LOGGER.info("Starting owwatcher...")
+    _LOGGER.warning(
+        "OWWatcher has been deprecated in favor of TmpWatcher. You can find more "
+        "information about TmpWatcher at https://github.com/mssalvatore/tmpwatcher "
+        "or install it with `sudo snap install tmpwatcher`."
+    )
     _log_config_options(options)
 
     _OWWATCHER.run(options.dirs, options.recursive)
